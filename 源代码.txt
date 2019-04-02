@@ -1,0 +1,434 @@
+1.在测试图像上产生高斯噪声lena图-需能指定均值和方差；并用多种滤波器恢复图像，分析各自优缺点；
+clear;
+p=imread('lena.bmp');
+figure(1)
+subplot (2,2,1) ; 
+imshow(p);
+title('lena.bmp的原始图像');
+pz=imnoise(p,'gaussian',0.1,0.02);
+subplot (2,2,2);
+imshow(pz);
+title('加入均值为0.1，方差为0.02的高斯噪声的图像');
+
+[m,n]=size(pz);
+k1=3;
+k2=5;
+k3=9;
+k11=(k1-1)/2;
+k22=(k2-1)/2;
+k33=(k3-1)/2;
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+        s=double(s);
+        s=1./s;
+        p1(i,j)=numel(s)/sum(s(:)); 
+
+    end
+end
+
+subplot(2,2,3);
+imshow(p1);
+title('3*3谐波均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+        s=double(s);
+        s=1./s;
+        p1(i,j)=numel(s)/sum(s(:));  
+    end
+end
+subplot(2,2,4);
+imshow(p1);
+title('5*5谐波均值后的图像');
+
+
+
+%算术均值
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11); 
+        s=double(s);
+        p1(i,j)=sum(s(:))/numel(s); 
+
+    end
+end
+figure(2)
+subplot(1,2,1);
+%p1=((p1-min(p1))./max(p1))*255;
+p1=uint8(p1);
+imshow(p1);
+title('3*3算术均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+         s=double(s);
+        p1(i,j)=sum(s(:))/numel(s);  
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5算术均值后的图像');
+
+
+%几何均值
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+         s=double(s);
+       p1(i,j)=prod(prod(s(:)))^(1/numel(s)); 
+
+    end
+end
+figure(3)
+subplot(1,2,1);
+p1=uint8(p1);
+imshow(p1);
+title('3*3几何均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22); 
+        s=double(s);
+        p1(i,j)=prod(prod(s(:)))^(1/numel(s));   
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5几何均值后的图像');
+
+%中值
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+         s=double(s);
+      t = sort(s(:));
+    p1(i,j)= t((numel(t)-1)/2);
+    end
+end
+figure(4)
+subplot(1,2,1);
+p1=uint8(p1);
+imshow(p1);
+title('3*3中值滤波后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+         s=double(s);
+        t = sort(s(:));
+    p1(i,j)= t((numel(t)-1)/2); 
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5中值滤波后的图像');
+
+%中点
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+         s=double(s);
+      t = s(:);
+       p1(i,j)= (max(t) + min(t))/2;
+    end
+end
+figure(5)
+subplot(1,2,1);
+p1=uint8(p1);
+imshow(p1);
+title('3*3中点滤波后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22); 
+        s=double(s);
+        t = s(:);
+       p1(i,j)= (max(t) + min(t))/2;
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5中点滤波后的图像');
+
+
+
+
+2.在测试图像lena图加入椒盐噪声（椒和盐噪声密度均是0.1）；用学过的滤波器恢复图像；在使用反谐波分析Q大于0和小于0的作用；
+clear;
+p=imread('lena.bmp');
+figure(1)
+subplot (2,2,1) ; 
+imshow(p);
+title('lena.bmp的原始图像');
+pz=imnoise(p,'salt & pepper',0.1);
+subplot (2,2,2);
+imshow(pz);
+title('加入噪声密度为0.1的椒盐噪声的图像');
+[m,n]=size(pz);
+k1=9;
+k2=5;
+k3=9;
+Q=1;
+k11=(k1-1)/2;
+k22=(k2-1)/2;
+k33=(k3-1)/2;
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+        s=double(s);
+     p1(i,j) = sum(s(:,:).^(Q+1))/sum(s(:,:).^Q);
+    end
+end
+subplot(2,2,3);
+p1=uint8(p1);
+imshow(p1);
+title('Q=1 3*3逆谐波均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+            s=double(s);
+        p1(i,j) = sum(s(:).^(Q+1))/sum(s(:).^Q);
+    end
+end
+subplot(2,2,4);
+p1=uint8(p1);
+imshow(p1);
+title('Q=1 5*5逆谐波均值后的图像');
+Q=-1;
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+           s=double(s);
+    p1(i,j) = sum(s(:).^(Q+1))/sum(s(:).^Q);
+
+    end
+end
+figure(2)
+subplot(1,2,1);
+imshow(p1);
+title('Q=-1 3*3逆谐波均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+            s=double(s);
+       p1(i,j) = sum(s(:).^(Q+1))/sum(s(:).^Q);
+    end
+end
+subplot(1,2,2);
+imshow(p1);
+title('Q=-1 5*5逆谐波均值后的图像');
+
+%算术均值
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+            s=double(s);
+        p1(i,j)=sum(s(:))/numel(s); 
+
+    end
+end
+figure(3)
+subplot(1,2,1);
+%p1=((p1-min(p1))./max(p1))*255;
+p1=uint8(p1);
+imshow(p1);
+title('3*3算术均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+        p1(i,j)=sum(s(:))/numel(s);  
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5算术均值后的图像');
+%中值
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+         s=double(s);
+      t = sort(s(:));
+    p1(i,j)= t((numel(t)-1)/2);
+    end
+end
+figure(4)
+subplot(1,2,1);
+p1=uint8(p1);
+imshow(p1);
+title('3*3中值滤波后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22);
+         s=double(s);
+        t = sort(s(:));
+    p1(i,j)= t((numel(t)-1)/2); 
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5中值滤波后的图像');
+
+%中点
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+         s=double(s);
+      t = s(:);
+       p1(i,j)= (max(t) + min(t))/2;
+    end
+end
+figure(5)
+subplot(1,2,1);
+p1=uint8(p1);
+imshow(p1);
+title('3*3中点滤波后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22); 
+        s=double(s);
+        t = s(:);
+       p1(i,j)= (max(t) + min(t))/2;
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5中点滤波后的图像');
+
+%几何均值
+p1 = p;
+for i=1+k11:1:m-k11
+    for j=1+k11:1:m-k11
+        s=pz(i-k11:1:i+k11,j-k11:1:j+k11);
+         s=double(s);
+       p1(i,j)=prod(prod(s(:)))^(1/numel(s)); 
+
+    end
+end
+figure(6)
+subplot(1,2,1);
+p1=uint8(p1);
+imshow(p1);
+title('3*3几何均值后的图像');
+for i=1+k22:1:m-k22
+    for j=1+k22:1:m-k22
+        %遍历每个点的四周
+        s=pz(i-k22:1:i+k22,j-k22:1:j+k22); 
+        s=double(s);
+        p1(i,j)=prod(prod(s(:)))^(1/numel(s));   
+    end
+end
+subplot(1,2,2);
+p1=uint8(p1);
+imshow(p1);
+title('5*5几何均值后的图像');
+
+
+
+3.推导维纳滤波器并实现下边要求；
+(a) 实现模糊滤波器如方程Eq. (5.6-11).
+(b) 模糊lena图像：45度方向，T=1；
+(c) 再模糊的lena图像中增加高斯噪声，均值= 0 ，方差=10 pixels 以产生模糊图像；
+(d)分别利用方程 Eq. (5.8-6)和(5.9-4)，恢复图像；并分析算法的优缺点.
+clear;
+p=imread('lena.bmp');
+figure(1)
+subplot (2,2,1) ; 
+imshow(p);
+title('lena.bmp的原始图像');
+d=double(p);
+f1=fft2(d);
+f1=fftshift(f1);
+[m,n]=size(f1);
+a=0.1;
+b=0.1;
+T=1;
+for u=1:m
+    for v=1:n
+        h(u,v)=(T/(pi*(a*u+b*v)))*sin(pi*(a*u+b*v))*(exp(-sqrt(-1)*pi*(a*u+b*v)));
+        g(u,v)=h(u,v)*f1(u,v);
+    end
+end
+g1=ifftshift(g);
+g1=ifft2(g1);
+g1=real(g1);
+g1mx=max(max(g1));
+g1mn=min(min(g1));
+g1=255*(g1-g1mn)/(g1mx-g1mn);
+g1=uint8(g1);
+subplot(2,2,2);
+imshow(g1);
+title('模糊滤波器后的图像');
+
+h1=fspecial('motion',25,45);
+p1=imfilter(p,h1,'circular','conv');
+subplot(2,2,3);
+imshow(p1);
+title('45度模糊后的图像');
+a1=double(p1);
+f2=fft2(a1);
+f2=fftshift(f2);
+pz=imnoise(p1,'gaussian',0,100/(512*512));
+subplot(2,2,4);
+imshow(pz);
+title('45度加高斯模糊后的图像');
+a1=double(pz);
+f=fft2(a1);
+f=fftshift(f);
+[m,n]=size(f);
+a=0.1;
+b=0.1;
+T=1;
+k=0.025;
+q=zeros(m,n);
+q(1:3,1:3)=[0,-1,0;-1,4,-1;0,-1,0];
+Q=fft(q);
+q1=fftshift(Q);
+for u=1:m
+    for v=1:n
+        h(u,v)=f2(u,v)/f1(u,v);
+        g(u,v)=1/h(u,v)*(abs(h(u,v)))^2/((abs(h(u,v)))^2+k)*f(u,v);
+    end
+end
+g1=ifftshift(g);
+g1=ifft2(g1);
+g1=real(g1);
+g1mx=max(max(g1));
+g1mn=min(min(g1));
+g1=255*(g1-g1mn)/(g1mx-g1mn);
+g1=uint8(g1);
+figure(2)
+subplot(1,2,1);
+imshow(g1);
+title('维纳恢复后的图像');
+v=0.0001;
+noisepower=v*prod(size(p));
+[g,lagra]=deconvreg(p1,h1,noisepower);
+
+subplot(1,2,2);
+imshow(g);
+title('最小二乘法恢复后的图像')
